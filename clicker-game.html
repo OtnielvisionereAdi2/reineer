@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Cosmic Clicker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@500;700;800&display=swap');
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: fixed;
+            touch-action: manipulation;
+        }
+
+        .game-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 12px;
+            background: linear-gradient(180deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 50%, rgba(240, 147, 251, 0.95) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background elements */
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            filter: blur(40px);
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 200px;
+            height: 200px;
+            background: #fff;
+            top: -50px;
+            right: -50px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 150px;
+            height: 150px;
+            background: #ffd700;
+            bottom: -30px;
+            left: -30px;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(30px); }
+        }
+
+        /* Header Section */
+        .header {
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+            animation: slideDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            letter-spacing: -0.5px;
+        }
+
+        .score-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 12px 24px;
+            margin-top: 8px;
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        #score {
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 4px;
+        }
+
+        .ppc-display {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        /* Main Game Area */
+        .game-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Cookie Button */
+        .cookie-btn {
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffa500 100%);
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 12px 30px rgba(255, 167, 38, 0.4), inset 0 4px 8px rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-size: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #ff8c00;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cookie-btn:active {
+            transform: scale(0.92);
+            box-shadow: 0 6px 15px rgba(255, 167, 38, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        }
+
+        .cookie-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Floating numbers animation */
+        .float-number {
+            position: fixed;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 24px;
+            pointer-events: none;
+            z-index: 20;
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(0, -80px) scale(1.2);
+            }
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .progress-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fff9e6 0%, #ffe66d 50%, #ffd700 100%);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Upgrades Section */
+        .upgrades-section {
+            width: 100%;
+            padding: 0 12px 16px;
+            max-height: 160px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .upgrades-header {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            padding: 0 8px;
+        }
+
+        .upgrades-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .upgrade-btn {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 14px;
+            padding: 12px 10px;
+            color: #fff;
+            font-family: 'Fredoka', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upgrade-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .upgrade-btn:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .upgrade-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .upgrade-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .upgrade-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .upgrade-name {
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .upgrade-cost {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+
+        .upgrade-count {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            background: rgba(255, 215, 0, 0.9);
+            color: #764ba2;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        /* Ripple effect on click */
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Stat Display */
+        .stats-bar {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 0 12px;
+            margin-top: 8px;
+            z-index: 10;
+            font-size: 11px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+        }
+
+        .stat-value {
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        /* Scrollbar styling */
+        .upgrades-section::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .upgrades-section::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .upgrades-section::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .upgrades-section::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="bg-orb orb-1"></div>
+        <div class="bg-orb orb-2"></div>
+
+        <!-- Header -->
+        <div class="header">
+            <h1 class="title">✨ Cosmic Clicker</h1>
+            <div class="score-container">
+                <div class="score-label">Score</div>
+                <div id="score">0</div>
+                <div class="ppc-display">+<span id="ppc">1</span> per click</div>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div class="game-area">
+            <button class="cookie-btn" id="cookie-btn">🍪</button>
+        </div>
+
+        <!-- Progress to next milestone -->
+        <div class="progress-section">
+            <div class="progress-label">Progress to Next Milestone</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div>Total Clicks</div>
+                <div class="stat-value" id="total-clicks">0</div>
+            </div>
+            <div class="stat-item">
+                <div>Auto/sec</div>
+                <div class="stat-value" id="auto-per-sec">0</div>
+            </div>
+        </div>
+
+        <!-- Upgrades -->
+        <div class="upgrades-section">
+            <div class="upgrades-header">Upgrades</div>
+            <div class="upgrades-grid" id="upgrades-grid">
+                <!-- Upgrades will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const gameState = {
+            score: 0,
+            totalClicks: 0,
+            pointsPerClick: 1,
+            autoClickRate: 0,
+            autoClickSpeed: 1000,
+            upgrades: [
+                {
+                    id: 'double-click',
+                    name: '2x Power',
+                    baseCost: 25,
+                    multiplier: 1.15,
+                    count: 0,
+                    type: 'multiplier',
+                    icon: '⚡'
+                },
+                {
+                    id: 'auto-clicker',
+                    name: 'Auto Click',
+                    baseCost: 50,
+                    multiplier: 1.2,
+                    count: 0,
+                    type: 'auto',
+                    icon: '🤖'
+                },
+                {
+                    id: 'mega-power',
+                    name: 'Mega Power',
+                    baseCost: 150,
+                    multiplier: 1.18,
+                    count: 0,
+                    type: 'multiplier',
+                    icon: '💥'
+                },
+                {
+                    id: 'hyper-click',
+                    name: 'Hyper Clicker',
+                    baseCost: 300,
+                    multiplier: 1.22,
+                    count: 0,
+                    type: 'auto',
+                    icon: '⚙️'
+                },
+                {
+                    id: 'cosmic-boost',
+                    name: 'Cosmic Boost',
+                    baseCost: 500,
+                    multiplier: 1.25,
+                    count: 0,
+                    type: 'multiplier',
+                    icon: '🌟'
+                },
+                {
+                    id: 'infinity-engine',
+                    name: 'Infinity Engine',
+                    baseCost: 1000,
+                    multiplier: 1.3,
+                    count: 0,
+                    type: 'auto',
+                    icon: '♾️'
+                }
+            ]
+        };
+
+        // DOM Elements
+        const scoreEl = document.getElementById('score');
+        const ppcEl = document.getElementById('ppc');
+        const cookieBtn = document.getElementById('cookie-btn');
+        const upgradesGrid = document.getElementById('upgrades-grid');
+        const progressFill = document.getElementById('progress-fill');
+        const totalClicksEl = document.getElementById('total-clicks');
+        const autoPerSecEl = document.getElementById('auto-per-sec');
+
+        // Initialize upgrades
+        function initializeUpgrades() {
+            upgradesGrid.innerHTML = '';
+            gameState.upgrades.forEach(upgrade => {
+                const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.count));
+                const btn = document.createElement('button');
+                btn.className = 'upgrade-btn';
+                btn.dataset.upgradeId = upgrade.id;
+                btn.innerHTML = `
+                    <span class="upgrade-name">${upgrade.icon} ${upgrade.name}</span>
+                    <span class="upgrade-cost">${cost}</span>
+                    ${upgrade.count > 0 ? `<span class="upgrade-count">${upgrade.count}</span>` : ''}
+                `;
+                btn.onclick = () => buyUpgrade(upgrade.id);
+                upgradesGrid.appendChild(btn);
+            });
+        }
+
+        // Buy upgrade
+        function buyUpgrade(upgradeId) {
+            const upgrade = gameState.upgrades.find(u => u.id === upgradeId);
+            if (!upgrade) return;
+
+            const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.count));
+            if (gameState.score < cost) return;
+
+            gameState.score -= cost;
+            upgrade.count++;
+
+            if (upgrade.type === 'multiplier') {
+                gameState.pointsPerClick += upgrade.baseCost / 50;
+            } else if (upgrade.type === 'auto') {
+                gameState.autoClickRate += Math.pow(1.5, upgrade.count) * 0.5;
+            }
+
+            updateUI();
+            initializeUpgrades();
+            playSound('upgrade');
+        }
+
+        // Cookie click handler
+        function handleCookieClick(e) {
+            gameState.score += gameState.pointsPerClick;
+            gameState.totalClicks++;
+
+            // Create floating number
+            const rect = cookieBtn.getBoundingClientRect();
+            const floatNum = document.createElement('div');
+            floatNum.className = 'float-number';
+            floatNum.textContent = `+${Math.floor(gameState.pointsPerClick)}`;
+            floatNum.style.left = (rect.left + rect.width / 2) + 'px';
+            floatNum.style.top = (rect.top + rect.height / 2) + 'px';
+            floatNum.style.color = '#FFD700';
+            document.body.appendChild(floatNum);
+            setTimeout(() => floatNum.remove(), 1000);
+
+            // Create ripple
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            ripple.style.left = (e.clientX - rect.left) + 'px';
+            ripple.style.top = (e.clientY - rect.top) + 'px';
+            ripple.style.width = '20px';
+            ripple.style.height = '20px';
+            ripple.style.marginLeft = '-10px';
+            ripple.style.marginTop = '-10px';
+            cookieBtn.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+
+            playSound('click');
+            updateUI();
+        }
+
+        // Auto-clicker
+        setInterval(() => {
+            if (gameState.autoClickRate > 0) {
+                const autoGain = (gameState.autoClickRate / 1000) * gameState.pointsPerClick;
+                gameState.score += autoGain;
+                gameState.totalClicks += gameState.autoClickRate / 1000;
+                updateUI();
+            }
+        }, 100);
+
+        // Update UI
+        function updateUI() {
+            scoreEl.textContent = Math.floor(gameState.score);
+            ppcEl.textContent = Math.floor(gameState.pointsPerClick * 10) / 10;
+            totalClicksEl.textContent = Math.floor(gameState.totalClicks);
+            autoPerSecEl.textContent = (gameState.autoClickRate / 1000).toFixed(1);
+
+            const milestone = 100 * (Math.floor(gameState.score / 100) + 1);
+            const progressPercent = Math.min((gameState.score % 100) / 100 * 100, 100);
+            progressFill.style.width = progressPercent + '%';
+
+            // Update upgrade buttons
+            gameState.upgrades.forEach(upgrade => {
+                const btn = document.querySelector(`[data-upgrade-id="${upgrade.id}"]`);
+                if (btn) {
+                    const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.count));
+                    btn.disabled = gameState.score < cost;
+                }
+            });
+        }
+
+        // Simple audio synthesis for sound effects
+        function playSound(type) {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            if (type === 'click') {
+                osc.frequency.value = 800;
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.1);
+            } else if (type === 'upgrade') {
+                osc.frequency.setValueAtTime(600, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.2);
+            }
+        }
+
+        // Event listeners
+        cookieBtn.addEventListener('click', handleCookieClick);
+        cookieBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const clickEvent = new MouseEvent('click', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            cookieBtn.dispatchEvent(clickEvent);
+        });
+
+        // Initialize
+        initializeUpgrades();
+        updateUI();
+    </script>
+</body>
+</html>
