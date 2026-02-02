@@ -1,7 +1,19 @@
 {
   "version": 2,
-  "public": true,
-  "buildCommand": "echo 'Static site ready'",
-  "outputDirectory": "."
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "public"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
 
