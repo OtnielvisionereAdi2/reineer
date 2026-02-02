@@ -1,0 +1,12 @@
+{
+  "name": "cosmic-clicker",
+  "version": "1.0.0",
+  "description": "A mobile-optimized clicking game",
+  "scripts": {
+    "build": "mkdir -p public && cp clicker-game.html public/index.html"
+  },
+  "keywords": ["clicker", "game", "mobile"],
+  "author": "",
+  "license": "MIT"
+}
+
